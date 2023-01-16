@@ -6,7 +6,7 @@ plugins {
 }
 
 jar {
-    enable = false
+    enabled = false
 }
 
 group = 'com.backend'
