@@ -6,5 +6,7 @@ spring:
 management:
   endpoints:
     web:
+      path-mapping:
+        health: health_check
       exposure:
-        exclude: "env,beans"
+        include: "*"
