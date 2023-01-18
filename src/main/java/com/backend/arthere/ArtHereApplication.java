@@ -10,7 +10,7 @@ public class ArtHereApplication {
 
     public static final String APPLICATION_LOCATIONS = "spring.config.location="
             + "classpath:application.yml,"
-            + "/app/config/art-here-backend/real-application.yml";
+            + "app/config/art-here-backend/real-application.yml";
 
     public static void main(String[] args) {
         new SpringApplicationBuilder(ArtHereApplication.class)
