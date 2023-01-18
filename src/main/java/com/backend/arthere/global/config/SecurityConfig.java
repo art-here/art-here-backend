@@ -12,7 +12,7 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
                 .authorizeHttpRequests()
-                .antMatchers("/health").permitAll()
+                .antMatchers("/actuator/health").permitAll()
                 .antMatchers("/profile").permitAll()
                 .anyRequest().authenticated();
 
