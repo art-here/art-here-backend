@@ -9,10 +9,8 @@ jasypt:
 management:
   endpoints:
     web:
-      path-mapping:
-        health: health_check
       exposure:
-        include: "*"
+        include: "health"
 
 ---
 spring:
