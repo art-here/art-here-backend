@@ -1,6 +1,24 @@
+---
 spring:
-  profiles:
-    default: local
+  config:
+    activate:
+      on-profile: set1
+server:
+  port: 8081
+
+---
+spring:
+  config:
+    activate:
+      on-profile: set2
+server:
+  port: 8082
+
+---
+spring:
+  config:
+    activate:
+      on-profile: real-db
 
   jpa:
     show-sql: true
