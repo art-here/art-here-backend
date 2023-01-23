@@ -1,11 +1,6 @@
 spring:
-  profiles:
-    active: local
-
   jpa:
     show-sql: true
-  datasource:
-    driver-class-name: org.h2.Driver # 시작할때 실행시킬 script
 
 jasypt:
   encryptor:
@@ -18,6 +13,11 @@ management:
         health: health_check
       exposure:
         include: "*"
+
+---
+spring:
+  profiles:
+    active: local
 
 ---
 spring:
