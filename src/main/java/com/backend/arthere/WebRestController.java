@@ -16,11 +16,11 @@ public class WebRestController {
 
     @GetMapping("/profile")
     public String getProfile() {
-        /*return Arrays.stream(env.getActiveProfiles())
-                .findFirst()
-                .orElse("");*/
-        return Arrays.stream(env.getDefaultProfiles())
+        return Arrays.stream(env.getActiveProfiles())
                 .findFirst()
                 .orElse("");
+//        return Arrays.stream(env.getDefaultProfiles())
+//                .findFirst()
+//                .orElse("");
     }
 }
