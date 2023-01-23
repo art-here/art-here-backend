@@ -1,6 +1,6 @@
 spring:
   profiles:
-    active: set1
+    active: set2
 
   jpa:
     show-sql: true
@@ -25,11 +25,3 @@ spring:
     group:
       set1: real-db
       set2: real-db
-
-management:
-  endpoints:
-    web:
-      path-mapping:
-        health: health_check
-      exposure:
-        include: "*"
