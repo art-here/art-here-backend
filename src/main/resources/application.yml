@@ -6,12 +6,6 @@ jasypt:
   encryptor:
     password: art_here_jasypt_key
 
-management:
-  endpoints:
-    web:
-      exposure:
-        include: "health"
-
 ---
 spring:
   profiles:
