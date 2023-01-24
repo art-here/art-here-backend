@@ -1,12 +1,12 @@
-spring:
-  config:
-    activate:
-      on-profile: prod
-
-management:
-  endpoints:
-    web:
-      path-mapping:
-        health: health_check
-      exposure:
-        include: "*"
+#spring:
+#  config:
+#    activate:
+#      on-profile: prod
+#
+#management:
+#  endpoints:
+#    web:
+#      path-mapping:
+#        health: health_check
+#      exposure:
+#        include: "*"
