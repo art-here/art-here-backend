@@ -1,5 +1,6 @@
 package com.backend.arthere.member.domain;
 
+import com.sun.istack.NotNull;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -21,25 +22,31 @@ public class Member {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "email", nullable = false)
+    @NotNull
+    @Column(name = "email")
     private String email;
 
-    @Column(name = "name", nullable = false, length = 50)
+    @NotNull
+    @Column(name = "name", length = 50)
     private String name;
 
+    @NotNull
     @Column(name = "profile")
     private String profile;
 
+    @NotNull
     @CreatedDate
-    @Column(name = "create_date", nullable = false, updatable = false)
+    @Column(name = "create_date", updatable = false)
     private LocalDateTime createDate;
 
+    @NotNull
     @Enumerated(EnumType.STRING)
-    @Column(name = "role", nullable = false)
+    @Column(name = "role")
     private Role role;
 
+    @NotNull
     @Enumerated(EnumType.STRING)
-    @Column(name = "social_type", nullable = false)
+    @Column(name = "social_type")
     private SocialType socialType;
 
     @Builder
