@@ -7,7 +7,9 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum SocialType {
     GOOGLE("google");
+
     private final String socialName;
+
     public boolean isSameSocialName(String socialName) {
         return this.socialName.equals(socialName);
     }
