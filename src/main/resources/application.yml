@@ -15,5 +15,5 @@ spring:
 spring:
   profiles:
     group:
-      set1: real-db
-      set2: real-db
+      set1: prod
+      set2: prod
