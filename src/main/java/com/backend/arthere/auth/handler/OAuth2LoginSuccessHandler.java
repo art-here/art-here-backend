@@ -4,8 +4,6 @@ import com.backend.arthere.auth.domain.HttpCookieOAuth2AuthorizationRequestRepos
 import com.backend.arthere.auth.domain.Token;
 import com.backend.arthere.auth.domain.TokenRepository;
 import com.backend.arthere.auth.domain.UserPrincipal;
-import com.backend.arthere.auth.dto.response.LoginResponse;
-import com.backend.arthere.auth.dto.response.TokenResponse;
 import com.backend.arthere.auth.jwt.JwtTokenProvider;
 import com.backend.arthere.auth.util.CookieUtils;
 import com.backend.arthere.member.domain.Member;
@@ -15,8 +13,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
@@ -26,11 +22,10 @@ import org.springframework.web.util.UriComponentsBuilder;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.awt.*;
 import java.io.IOException;
 import java.util.Optional;
 
-import static com.backend.arthere.auth.domain.HttpCookieOAuth2AuthorizationRequestRepository.REFRESH_TOKEN_COOKIE_NAME;
+import static com.backend.arthere.auth.domain.HttpCookieOAuth2AuthorizationRequestRepository.*;
 
 @Slf4j
 @Component
@@ -44,18 +39,20 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
 
     private final ObjectMapper objectMapper;
 
+    @Value("${oauth.redirect-uri}")
+    private String redirectUri;
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                         Authentication authentication) throws IOException, ServletException {
         log.info("OAuth2 Login 성공했습니다");
-
+        String targetUrl = determineTargetUrl(request, response, authentication);
         if(response.isCommitted()) {
             log.info("응답이 이미 커밋되었습니다.");
             return;
         }
-        saveTokenToBody(request, response, authentication);
 
         clearAuthenticationAttributes(request, response);
+        getRedirectStrategy().sendRedirect(request, response, targetUrl);
 
     }
 
@@ -83,20 +80,18 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
     }
 
 
-    protected void saveTokenToBody(HttpServletRequest request, HttpServletResponse response, Authentication authentication)
-            throws IOException {
-
+    @Override
+    protected String determineTargetUrl(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
         UserPrincipal principal = (UserPrincipal) authentication.getPrincipal();
+        String targetUrl = redirectUri;
         String accessToken = jwtTokenProvider
                 .createAccessToken(String.valueOf(principal.getId()));
         String refreshToken = saveRefreshToken(principal);
+        CookieUtils.addCookie(response, REFRESH_TOKEN_COOKIE_NAME, refreshToken, COOKIE_EXPIRE_SECONDS);
+        CookieUtils.addCookie(response, ACCESS_TOKEN_COOKIE_NAME, accessToken, COOKIE_EXPIRE_SECONDS);
 
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        response.setStatus(HttpStatus.OK.value());
-        response.setCharacterEncoding("utf-8");
-        response.getWriter()
-                .write(objectMapper.writeValueAsString(
-                        new LoginResponse(accessToken, refreshToken, principal.getId())
-                ));
+        return UriComponentsBuilder.fromUriString(targetUrl)
+                .queryParam("id", principal.getId())
+                .build().toUriString();
     }
 }
