@@ -15,7 +15,8 @@ public class HttpCookieOAuth2AuthorizationRequestRepository
     public static final String OAUTH2_AUTHORIZATION_REQUEST_COOKIE_NAME = "oauth2_auth_request";
     public static final String REDIRECT_URI_PARAM_COOKIE_NAME = "redirect_uri";
     public static final String REFRESH_TOKEN_COOKIE_NAME = "refresh_token";
-    private static final int cookieExpireSeconds = 180;
+    public static final String ACCESS_TOKEN_COOKIE_NAME = "access_token";
+    public static final int COOKIE_EXPIRE_SECONDS = 3600;
 
     @Override
     public OAuth2AuthorizationRequest removeAuthorizationRequest(HttpServletRequest request) {
@@ -40,7 +41,8 @@ public class HttpCookieOAuth2AuthorizationRequestRepository
     }
 
     @Override
-    public void saveAuthorizationRequest(OAuth2AuthorizationRequest authorizationRequest, HttpServletRequest request, HttpServletResponse response) {
+    public void saveAuthorizationRequest(OAuth2AuthorizationRequest authorizationRequest,
+                                         HttpServletRequest request, HttpServletResponse response) {
         if(authorizationRequest == null) {
             CookieUtils.deleteCookie(request, response, OAUTH2_AUTHORIZATION_REQUEST_COOKIE_NAME);
             CookieUtils.deleteCookie(request, response, REDIRECT_URI_PARAM_COOKIE_NAME);
@@ -48,11 +50,11 @@ public class HttpCookieOAuth2AuthorizationRequestRepository
         }
 
         CookieUtils.addCookie(response, OAUTH2_AUTHORIZATION_REQUEST_COOKIE_NAME,
-                CookieUtils.serialize(authorizationRequest), cookieExpireSeconds);
+                CookieUtils.serialize(authorizationRequest), COOKIE_EXPIRE_SECONDS);
         String redirectUrAfterLogin = request.getParameter(REDIRECT_URI_PARAM_COOKIE_NAME);
         if(StringUtils.isNotBlank(redirectUrAfterLogin)) {
             CookieUtils.addCookie(response, REDIRECT_URI_PARAM_COOKIE_NAME,
-                    redirectUrAfterLogin, cookieExpireSeconds);
+                    redirectUrAfterLogin, COOKIE_EXPIRE_SECONDS);
         }
     }
 }
