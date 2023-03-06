@@ -12,6 +12,10 @@ spring:
               - profile
               - email
 
+oauth:
+  redirect-uri: https://art-here.site/oauth/success
+  domain: .art-here.site
+
 security:
   jwt:
     token:
