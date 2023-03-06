@@ -21,7 +21,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
                 .allowedOrigins("http://localhost:5173")
                 .allowedMethods("*")
                 .allowedHeaders("*")
-                .exposedHeaders("Access-Token","Refresh-Token")
+                .exposedHeaders("Set-Cookie")
                 .allowCredentials(true);
     }
     @Override
