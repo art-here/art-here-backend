@@ -1,5 +1,6 @@
 package com.backend.arthere.auth.util;
 
+import org.springframework.boot.web.server.Cookie.SameSite;
 import org.springframework.http.ResponseCookie;
 import org.springframework.util.SerializationUtils;
 
@@ -43,11 +44,9 @@ public class CookieUtils {
 
     public static void addCookie(HttpServletResponse response, String name, String value, int maxAge) {
         ResponseCookie cookie = ResponseCookie.from(name, value)
-                .path("/login")
                 .httpOnly(true)
-                .maxAge(maxAge)
                 .secure(true)
-                .sameSite("None")
+                .sameSite(SameSite.NONE.attributeValue())
                 .build();
         response.addHeader("Set-Cookie", cookie.toString());
     }

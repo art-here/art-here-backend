@@ -13,7 +13,7 @@ spring:
               - email
 
 oauth:
-  redirect-uri: https://art-here.site/login
+  redirect-uri: https://art-here.site/oauth/success
   domain: .art-here.site
 
 security:
