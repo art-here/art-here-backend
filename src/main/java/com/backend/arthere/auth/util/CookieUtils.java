@@ -1,5 +1,6 @@
 package com.backend.arthere.auth.util;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.server.Cookie.SameSite;
 import org.springframework.http.ResponseCookie;
 import org.springframework.util.SerializationUtils;
@@ -11,6 +12,9 @@ import java.util.Base64;
 import java.util.Optional;
 
 public class CookieUtils {
+
+    @Value("${oauth.domain}")
+    private static String domain;
 
     private static boolean validateCookies(Cookie[] cookies) {
         return cookies != null && cookies.length > 0;
@@ -45,7 +49,7 @@ public class CookieUtils {
     public static void addCookie(HttpServletResponse response, String name, String value, int maxAge) {
         ResponseCookie cookie = ResponseCookie.from(name, value)
                 .path("/")
-                .domain(".art-here.site")
+                .domain(domain)
                 .httpOnly(true)
                 .secure(true)
                 .sameSite(SameSite.NONE.attributeValue())
