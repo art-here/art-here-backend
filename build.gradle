@@ -45,6 +45,7 @@ dependencies {
     implementation "com.querydsl:querydsl-jpa:${queryDslVersion}"
     implementation "com.querydsl:querydsl-apt:${queryDslVersion}"
     implementation "com.querydsl:querydsl-core:${queryDslVersion}"
+    implementation "io.findify:s3mock_2.12:0.2.6"
 
     compileOnly 'org.projectlombok:lombok'
 
