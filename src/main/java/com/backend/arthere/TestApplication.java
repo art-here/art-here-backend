@@ -11,7 +11,8 @@ import org.springframework.context.annotation.FilterType;
 public class TestApplication {
 
     public static final String APPLICATION_LOCATIONS = "spring.config.location="
-            + "classpath:application-test.yml";
+            + "classpath:application-test.yml,"
+            + "/home/ec2-user/app/application-server.yml";
 
     public static void main(String[] args) {
         new SpringApplicationBuilder(TestApplication.class)
