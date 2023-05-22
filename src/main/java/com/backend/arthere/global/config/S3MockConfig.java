@@ -20,7 +20,7 @@ public class S3MockConfig {
         return new S3Mock.Builder().withPort(8001).withInMemoryBackend().build();
     }
 
-    @Bean(name = "AdminS3Client")
+    @Bean(name = "adminS3Client")
     public AmazonS3 createS3Client() {
 
         AwsClientBuilder.EndpointConfiguration endpoint = new AwsClientBuilder
@@ -34,7 +34,7 @@ public class S3MockConfig {
 
     }
 
-    @Bean(name = "AdminBucketName")
+    @Bean(name = "adminBucketName")
     public String getBucketName() {
         return "image";
     }
