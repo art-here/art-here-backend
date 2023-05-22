@@ -11,6 +11,8 @@ import com.backend.arthere.member.domain.SocialType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class FakeLoginService {
@@ -20,18 +22,27 @@ public class FakeLoginService {
 
     public TokenResponse login() {
 
-        Member member = Member.builder()
-                            .name("회원")
-                            .email("123@gmail.com")
-                            .socialType(SocialType.GOOGLE)
-                            .role(Role.USER)
-                            .profile("사진")
-                            .build();
+        int number = (int)(Math.random()*100);
+        String email = number + "@gmail.com";
 
-        memberRepository.save(member);
+        Member member = findMember(email);
 
         String accessToken = jwtTokenProvider.createAccessToken(String.valueOf(member.getId()));
         tokenRepository.save(new Token(accessToken, member));
         return new TokenResponse(accessToken);
+    }
+
+    public Member findMember(String email) {
+        Optional<Member> member = memberRepository.findByEmail(email);
+        if(member.isPresent()) {
+            return member.get();
+        }
+        return memberRepository.save(Member.builder()
+                .name("회원")
+                .email(email)
+                .socialType(SocialType.GOOGLE)
+                .role(Role.USER)
+                .profile("사진")
+                .build());
     }
 }
