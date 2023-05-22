@@ -81,9 +81,9 @@ public class ControllerAdvice {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
     }
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handle(Exception error) {
-        ErrorResponse errorResponse = new ErrorResponse(INTERNAL_SERVER_ERROR_MESSAGE);
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
-    }
+//    @ExceptionHandler(Exception.class)
+//    public ResponseEntity<ErrorResponse> handle(Exception error) {
+//        ErrorResponse errorResponse = new ErrorResponse(INTERNAL_SERVER_ERROR_MESSAGE);
+//        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+//    }
 }
