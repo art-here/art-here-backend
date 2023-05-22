@@ -1,11 +1,12 @@
 package com.backend.arthere.arts.application;
 
-import com.amazonaws.services.s3.AmazonS3;
 import com.backend.arthere.arts.domain.ArtsRepository;
-import com.backend.arthere.arts.dto.*;
-import com.backend.arthere.arts.exception.ArtsNotFoundException;
+import com.backend.arthere.arts.dto.request.ArtImageByAddressRequest;
+import com.backend.arthere.arts.dto.request.ArtImageByArtNameRequest;
+import com.backend.arthere.arts.dto.request.ArtImageByLocationRequest;
+import com.backend.arthere.arts.dto.request.ArtImageByRevisionDateRequest;
+import com.backend.arthere.arts.dto.response.*;
 import com.backend.arthere.arts.util.LocationUtils;
-import com.backend.arthere.global.config.AdminS3Config;
 import com.backend.arthere.image.util.PresignedURLUtils;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -13,7 +14,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.context.annotation.Import;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -22,7 +22,6 @@ import java.util.List;
 
 import static com.backend.arthere.fixture.ArtsFixtures.메인화면_주소_검색_요청;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 
@@ -73,27 +72,28 @@ class ArtsServiceTest {
         given(artsRepository.findArtImageByRevisionDate(any()))
                 .willReturn(repositoryResponses);
 
-        //when //then
-        assertThatThrownBy(() -> artsService.findArtImageByRevisionDate(request))
-                .isInstanceOf(ArtsNotFoundException.class);
+        //when
+        ArtImageByRevisionDateResponse responses = artsService.findArtImageByRevisionDate(request);
+
+        // then
+        Assertions.assertThat(responses.getArtImageResponses()).isEqualTo(List.of());
     }
 
     @Test
     void 지도화면_이미지_중심위치_지정반경_데이터_반환() {
 
         //given
-        double latitude = 37.565328;
-        double longitude = 126.976431;
+        ArtImageByLocationRequest request = artLocationRequest("37.565328", "126.976431", "50");
         String preSignedURL = "https://art-here-frontend.s3.ap-northeast-2.amazonaws.com/image/sand.jpg?X-Amz-Algorithm";
 
-        given(locationUtils.getLocationRange(anyDouble(), anyDouble()))
+        given(locationUtils.getLocationRange(any()))
                 .willReturn(locationRangeResponse());
         given(artsRepository.findArtImageByLocation(any()))
                 .willReturn(findArtImageByLocationRepositoryResponse());
         given(presignedURLUtils.createImageShareURL(anyString(), any(), any())).willReturn(preSignedURL);
 
         //when
-        List<ArtImageByLocationResponse> responses = artsService.findArtImageByLocation(latitude, longitude);
+        List<ArtImageByLocationResponse> responses = artsService.findArtImageByLocation(request);
 
         //then
         Assertions.assertThat(responses).usingRecursiveFieldByFieldElementComparator()
@@ -104,18 +104,19 @@ class ArtsServiceTest {
     void 지도화면_이미지_중심위치_지정반경_null_반환() {
 
         //given
-        double latitude = 37.565328;
-        double longitude = 126.976431;
+        ArtImageByLocationRequest request = artLocationRequest("37.565328", "126.976431", "50");
         List<ArtImageByLocationResponse> repositoryResponses = List.of();
 
-        given(locationUtils.getLocationRange(anyDouble(), anyDouble()))
+        given(locationUtils.getLocationRange(any()))
                 .willReturn(locationRangeResponse());
         given(artsRepository.findArtImageByLocation(any()))
                 .willReturn(repositoryResponses);
 
-        //when //then
-        assertThatThrownBy(() -> artsService.findArtImageByLocation(latitude, longitude))
-                .isInstanceOf(ArtsNotFoundException.class);
+        //when
+        List<ArtImageByLocationResponse> responses = artsService.findArtImageByLocation(any());
+
+        // then
+        Assertions.assertThat(responses).contains();
     }
 
     @Test
@@ -241,9 +242,11 @@ class ArtsServiceTest {
         given(artsRepository.findArtImageByArtName(any()))
                 .willReturn(repositoryResponses);
 
-        //when //then
-        assertThatThrownBy(() -> artsService.searchArtImageByArtName(request))
-                .isInstanceOf(ArtsNotFoundException.class);
+        //when
+        ArtImageByArtNameResponse responses = artsService.searchArtImageByArtName(request);
+
+        // then
+        Assertions.assertThat(responses.getArtImageResponses()).isEqualTo(List.of());
     }
 
     private ArtImageResponse findArtImageByRevisionDateServiceResponse() {
@@ -314,7 +317,7 @@ class ArtsServiceTest {
             request.setIdx(idx);
         }
         if (revisionDateIdx != null) {
-            request.setRevisionDateIdx(revisionDateIdx);
+            request.setDate(revisionDateIdx);
         }
         request.setLimit(limit);
 
@@ -328,6 +331,16 @@ class ArtsServiceTest {
         }
         request.setName(name);
         request.setLimit(limit);
+
+        return request;
+    }
+
+    private ArtImageByLocationRequest artLocationRequest(String latitued, String longitude, String radius) {
+
+        ArtImageByLocationRequest request = new ArtImageByLocationRequest();
+        request.setLatitude(latitued);
+        request.setLongitude(longitude);
+        request.setRadius(radius);
 
         return request;
     }

@@ -13,6 +13,7 @@ import com.backend.arthere.auth.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -20,6 +21,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsUtils;
 
 @Configuration
 @RequiredArgsConstructor
@@ -51,11 +53,14 @@ public class SecurityConfig {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeHttpRequests()
+                .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
                 .antMatchers("/actuator/health").permitAll()
                 .antMatchers("/profile").permitAll()
                 .antMatchers("/h2-console/**").permitAll()
-                .antMatchers("/api/auth/**", "/oauth2/**", "/login/**").permitAll()
+                .antMatchers("/api/auth/**", "/oauth2/**", "/login/**", "/api/posts").permitAll()
+                .antMatchers(HttpMethod.GET, "/api/posts/**/comments").permitAll()
                 .antMatchers("/api/admin/**").hasRole("ADMIN")
+                .antMatchers("/api/satisfaction/**").hasRole("USER")
                 .anyRequest().authenticated()
                 .and()
                 .exceptionHandling()
@@ -81,6 +86,7 @@ public class SecurityConfig {
             "/api/image/media/name",
             "/api/image/map",
             "/api/art",
-            "/api/art/map"
+            "/api/art/map",
+            "/api/satisfaction/list"
     };
 }

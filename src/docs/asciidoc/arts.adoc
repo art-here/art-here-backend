@@ -4,7 +4,7 @@
 === 수정일 순으로 이미지 요청
 
 - 수정일 내림차순으로 id, 작품 이름, 이미지 URL 데이터 반환한다.
-- revisionDateIdx, idx, limit를 parameter 값으로 요청한다.
+- date, idx, limit를 parameter 값으로 요청한다.
 - nextIdx, nextRevisionDateIdx로 다음 데이터 위치를 알려준다.
 - hasNext는 다음 데이터 유무를 알려준다.
 
@@ -18,31 +18,53 @@ operation::image/media[snippets='request-parameters,response-fields,http-request
 
 operation::image/media/next[snippets='request-parameters,response-fields,http-request,http-response']
 
+===== 카테고리 요청
+
+- 카테고리 조건이 있는 경우
+
+    " & category = 기타 " 추가
+
+- 카테고리 조건이 없는 경우
+
+    추가하지 않는다.
+
+operation::image/media/category[snippets='request-parameters,response-fields,http-request,http-response']
+
 ===== 다음에 요청할 데이터가 없는 경우
 
 operation::image/media/false[snippets='http-response']
 
-==== 실패
+===== 요청 데이터가 없는 경우
 
 limit에 해당하는 데이터가 존재하지 않는다.
 
-operation::image/media/notfound[snippets='http-response']
+operation::image/media/empty[snippets='http-response']
+
+limit가 1 미만일 경우
+
+operation::image/media/min[snippets='http-request,http-response']
+
+limit가 10 초과일 경우
+
+operation::image/media/max[snippets='http-request,http-response']
 
 === 중심위치 지정 반경내 이미지 요청
 
-요청한 중심위치 위도 (latitude), 경도 (longitude)로 id, 작품 이름, 이미지 URL, 위도, 경도 데이터 반환한다.
+요청한 중심위치 위도 (latitude), 경도 (longitude), 반경으로 id, 작품 이름, 이미지 URL, 위도, 경도 데이터 반환한다.
 
 operation::image/map[snippets='request-parameters,response-fields,http-request']
 
 ==== 성공
 
+===== 요청 데이터 있는 경우
+
 operation::image/map[snippets='http-response']
 
-==== 실패
+===== 요청 데이터 없는 경우
 
 요청에 해당하는 데이터가 존재하지 않는다.
 
-operation::image/map/notfound[snippets='http-response']
+operation::image/map/empty[snippets='http-response']
 
 === 메인화면에서 주소 검색
 
@@ -60,6 +82,18 @@ operation::image/media/address[snippets='request-parameters,response-fields,http
 ===== 다음 요청
 
 operation::image/media/address/next[snippets='request-parameters,response-fields,http-request,http-response']
+
+===== 카테고리 요청
+
+- 카테고리 조건이 있는 경우
+
+    " & category = 기타 " 추가
+
+- 카테고리 조건이 없는 경우
+
+    추가하지 않는다.
+
+operation::image/media/address/category[snippets='request-parameters,response-fields,http-request,http-response']
 
 ===== 검색어와 일치하는 데이터가 없는 경우
 
@@ -94,9 +128,21 @@ operation::image/media/name[snippets='request-parameters,response-fields,http-re
 
 operation::image/media/name/next[snippets='request-parameters,response-fields,http-request,http-response']
 
-===== 검색어와 일치하는 데이터가 없는 경우
+===== 카테고리 요청
 
-operation::image/media/name/notfound[snippets='http-response']
+- 카테고리 조건이 있는 경우
+
+    " & category = 기타 " 추가
+
+- 카테고리 조건이 없는 경우
+
+    추가하지 않는다.
+
+operation::image/media/name/category[snippets='request-parameters,response-fields,http-request,http-response']
+
+===== 요청 데이터가 없는 경우
+
+operation::image/media/name/empty[snippets='http-response']
 
 ==== 실패
 

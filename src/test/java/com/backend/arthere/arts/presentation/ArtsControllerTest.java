@@ -1,10 +1,8 @@
 package com.backend.arthere.arts.presentation;
 
 import com.backend.arthere.arts.application.ArtsService;
-import com.backend.arthere.arts.dto.*;
-import com.backend.arthere.arts.exception.ArtsNotFoundException;
+import com.backend.arthere.arts.dto.response.*;
 import com.backend.arthere.global.BaseControllerTest;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -18,7 +16,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
@@ -88,7 +85,7 @@ class ArtsControllerTest extends BaseControllerTest {
         //when
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
                 .get("/api/image/media")
-                .param("revisionDateIdx", "2023-02-26T00:09:47.019594")
+                .param("date", "2023-02-26T00:09:47.019594")
                 .param("idx", "5")
                 .param("limit", "5"));
 
@@ -98,9 +95,56 @@ class ArtsControllerTest extends BaseControllerTest {
                 .andDo(
                         document("image/media/next",
                                 requestParameters(
-                                        parameterWithName("revisionDateIdx").description("요청을 시작하는 수정일 위치"),
+                                        parameterWithName("date").description("요청을 시작하는 수정일 위치"),
                                         parameterWithName("idx").description("요청을 시작하는 id 위치"),
                                         parameterWithName("limit").description("요청하는 데이터 개수")
+                                ),
+                                responseFields(
+                                        fieldWithPath("artImageResponses.[].id").type(JsonFieldType.NUMBER)
+                                                .description("id"),
+                                        fieldWithPath("artImageResponses.[].artName").type(JsonFieldType.STRING)
+                                                .description("작품 이름"),
+                                        fieldWithPath("artImageResponses.[].imageURL").type(JsonFieldType.STRING)
+                                                .description("이미지 URL"),
+                                        fieldWithPath("nextIdx").type(JsonFieldType.NUMBER)
+                                                .description("다음 페이지 idx"),
+                                        fieldWithPath("nextRevisionDateIdx").type(JsonFieldType.STRING)
+                                                .description("다음 페이지 idx"),
+                                        fieldWithPath("hasNext").type(JsonFieldType.BOOLEAN)
+                                                .description("다음 페이지 유무")
+                                )
+                        )
+                );
+    }
+
+    @Test
+    @WithMockUser
+    void 메인화면_이미지_수정일_내림차순_카테고리_응답() throws Exception {
+
+        //given
+        LocalDateTime next = LocalDateTime.parse("2023-01-26T00:09:47.019594");
+        boolean hasNext = true;
+        ArtImageByRevisionDateResponse response = artsImageResponse(1L, next, hasNext);
+        given(artsService.findArtImageByRevisionDate(any())).willReturn(response);
+
+        //when
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
+                .get("/api/image/media")
+                .param("date", "2023-02-26T00:09:47.019594")
+                .param("idx", "5")
+                .param("limit", "5")
+                .param("category","기타"));
+
+        //then
+        resultActions.andExpect(status().isOk())
+                .andDo(print())
+                .andDo(
+                        document("image/media/category",
+                                requestParameters(
+                                        parameterWithName("date").description("요청을 시작하는 수정일 위치"),
+                                        parameterWithName("idx").description("요청을 시작하는 id 위치"),
+                                        parameterWithName("limit").description("요청하는 데이터 개수"),
+                                        parameterWithName("category").description("요청하는 카테고리")
                                 ),
                                 responseFields(
                                         fieldWithPath("artImageResponses.[].id").type(JsonFieldType.NUMBER)
@@ -125,7 +169,9 @@ class ArtsControllerTest extends BaseControllerTest {
     void 메인화면_이미지_수정일_내림차순_데이터_없는_예외_응답() throws Exception {
 
         //given
-        given(artsService.findArtImageByRevisionDate(any())).willThrow(new ArtsNotFoundException());
+        ArtImageByRevisionDateResponse response =
+                new ArtImageByRevisionDateResponse(List.of(), null, null, false);
+        given(artsService.findArtImageByRevisionDate(any())).willReturn(response);
 
         //when
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
@@ -133,10 +179,21 @@ class ArtsControllerTest extends BaseControllerTest {
                 .param("limit", "5"));
 
         //then
-        resultActions.andExpect(status().isNotFound())
+        resultActions.andExpect(status().isOk())
                 .andDo(print())
                 .andDo(
-                        document("image/media/notfound")
+                        document("image/media/empty",
+                                responseFields(
+                                        fieldWithPath("artImageResponses").type(JsonFieldType.ARRAY)
+                                                .description("데이터가 없는 경우 리스트는 비어있음"),
+                                        fieldWithPath("nextIdx").type(JsonFieldType.NULL)
+                                                .description("다음 페이지 idx"),
+                                        fieldWithPath("nextRevisionDateIdx").type(JsonFieldType.NULL)
+                                                .description("다음 수정일 idx"),
+                                        fieldWithPath("hasNext").type(JsonFieldType.BOOLEAN)
+                                                .description("다음 페이지 유무")
+                                )
+                        )
                 );
     }
 
@@ -146,13 +203,14 @@ class ArtsControllerTest extends BaseControllerTest {
 
         //given
         List<ArtImageByLocationResponse> response = artsImageByLocationResponse();
-        given(artsService.findArtImageByLocation(anyDouble(), anyDouble())).willReturn(response);
+        given(artsService.findArtImageByLocation(any())).willReturn(response);
 
         //when
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
                 .get("/api/image/map")
                 .param("latitude", "37.587241")
-                .param("longitude", "127.019941"));
+                .param("longitude", "127.019941")
+                .param("radius", "50"));
 
         //then
         resultActions.andExpect(status().isOk())
@@ -161,7 +219,8 @@ class ArtsControllerTest extends BaseControllerTest {
                         document("image/map",
                                 requestParameters(
                                         parameterWithName("latitude").description("사용자 위치 위도"),
-                                        parameterWithName("longitude").description("사용자 위치 경도")
+                                        parameterWithName("longitude").description("사용자 위치 경도"),
+                                        parameterWithName("radius").description("반경")
                                 ),
                                 responseFields(
                                         fieldWithPath("[].id").type(JsonFieldType.NUMBER).description("id"),
@@ -176,22 +235,31 @@ class ArtsControllerTest extends BaseControllerTest {
 
     @Test
     @WithMockUser
-    void 지도화면_이미지_중심위치_지정반경_데이터_없는_예외_응답() throws Exception {
+    void 지도화면_이미지_중심위치_지정반경_데이터_없음() throws Exception {
 
         //given
-        given(artsService.findArtImageByLocation(anyDouble(), anyDouble())).willThrow(new ArtsNotFoundException());
+        given(artsService.findArtImageByLocation(any())).willReturn(List.of());
 
         //when
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
                 .get("/api/image/map")
                 .param("latitude", "37.587241")
-                .param("longitude", "127.019941"));
+                .param("longitude", "127.019941")
+                .param("radius", "50"));
 
         //then
-        resultActions.andExpect(status().isNotFound())
+        resultActions.andExpect(status().isOk())
                 .andDo(print())
                 .andDo(
-                        document("image/map/notfound")
+                        document("image/map/empty",
+                                requestParameters(
+                                        parameterWithName("latitude").description("사용자 위치 위도"),
+                                        parameterWithName("longitude").description("사용자 위치 경도"),
+                                        parameterWithName("radius").description("반경")
+                                ),
+                                responseFields(
+                                )
+                        )
                 );
     }
 
@@ -207,7 +275,7 @@ class ArtsControllerTest extends BaseControllerTest {
         //when
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
                 .get("/api/image/media")
-                .param("revisionDateIdx", "2023-02-26T00:09:47.019594")
+                .param("date", "2023-02-26T00:09:47.019594")
                 .param("idx", "5")
                 .param("limit", "5"));
 
@@ -220,36 +288,38 @@ class ArtsControllerTest extends BaseControllerTest {
                 );
     }
 
-    //@Test
-    //@WithMockUser
+    @Test
+    @WithMockUser
     void 메인화면_이미지_수정일_내림차순_요청_limit_1미만_예외_응답() throws Exception {
 
-        //when //then
-        Assertions.assertThatThrownBy(() ->
-                mockMvc.perform(MockMvcRequestBuilders
-                                .get("/api/image/media")
-                                .param("limit", "0"))
-                        .andExpect(status().isBadRequest())
-                        .andDo(print())
-                        .andDo(
-                                document("image/media/min")
-                        )).isInstanceOf(Exception.class);
+        //when
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
+                .get("/api/image/media")
+                .param("limit", "0"));
+
+        //then
+        resultActions.andExpect(status().isBadRequest())
+                .andDo(print())
+                .andDo(
+                        document("image/media/min")
+                );
     }
 
-    //@Test
-    //@WithMockUser
+    @Test
+    @WithMockUser
     void 메인화면_이미지_수정일_내림차순_요청_limit_10초과_예외_응답() throws Exception {
 
-        //when //then
-        Assertions.assertThatThrownBy(() ->
-                mockMvc.perform(MockMvcRequestBuilders
-                                .get("/api/image/media")
-                                .param("limit", "11"))
-                        .andExpect(status().isBadRequest())
-                        .andDo(print())
-                        .andDo(
-                                document("image/media/max")
-                        )).isInstanceOf(Exception.class);
+        //when
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
+                .get("/api/image/media")
+                .param("limit", "11"));
+
+        //then
+        resultActions.andExpect(status().isBadRequest())
+                .andDo(print())
+                .andDo(
+                        document("image/media/max")
+                );
     }
 
     @Test
@@ -354,6 +424,51 @@ class ArtsControllerTest extends BaseControllerTest {
 
     @Test
     @WithMockUser
+    public void 메인화면에서_주소_검색시_카테고리_응답() throws Exception {
+        //given
+        ArtImageByAddressResponse response = artImageByAddressResponse(false, null);
+
+        given(artsService.searchArtImageByAddress(any()))
+                .willReturn(response);
+
+        //when
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
+                .get("/api/image/media/address")
+                .param("idx", "3")
+                .param("query", "test")
+                .param("limit", "5")
+                .param("category","기타"));
+
+        //then
+        resultActions.andExpect(status().isOk())
+                .andDo(print())
+                .andDo(
+                        document("image/media/address/category",
+                                requestParameters(
+                                        parameterWithName("idx").description("요청을 시작하는 id 위치"),
+                                        parameterWithName("query").description("검색어"),
+                                        parameterWithName("limit").description("요청하는 데이터 개수"),
+                                        parameterWithName("category").description("요청하는 카테고리")
+                                ),
+                                responseFields(
+                                        fieldWithPath("artImageResponses.[].id").type(JsonFieldType.NUMBER)
+                                                .description("id"),
+                                        fieldWithPath("artImageResponses.[].artName").type(JsonFieldType.STRING)
+                                                .description("작품 이름"),
+                                        fieldWithPath("artImageResponses.[].imageURL").type(JsonFieldType.STRING)
+                                                .description("이미지 URL"),
+                                        fieldWithPath("nextIdx").type(JsonFieldType.NULL)
+                                                .description("다음 페이지 idx"),
+                                        fieldWithPath("hasNext").type(JsonFieldType.BOOLEAN)
+                                                .description("다음 페이지 유무")
+                                )
+                        )
+                );
+
+    }
+
+    @Test
+    @WithMockUser
     public void 메인화면에서_주소_검색시_검색어와_일치하는_데이터가_없는_경우_응답() throws Exception {
         //given
         ArtImageByAddressResponse response = new ArtImageByAddressResponse(List.of(), false, null);
@@ -370,11 +485,6 @@ class ArtsControllerTest extends BaseControllerTest {
                 .andDo(print())
                 .andDo(
                         document("image/media/address/empty",
-                                requestParameters(
-                                        parameterWithName("idx").description("요청을 시작하는 id 위치"),
-                                        parameterWithName("query").description("검색어"),
-                                        parameterWithName("limit").description("요청하는 데이터 개수")
-                                ),
                                 responseFields(
                                         fieldWithPath("artImageResponses").type(JsonFieldType.ARRAY)
                                                 .description("데이터가 없는 경우 리스트는 비어있음"),
@@ -509,10 +619,58 @@ class ArtsControllerTest extends BaseControllerTest {
 
     @Test
     @WithMockUser
+    public void 메인화면에서_작품명_검색시_카테고리_응답() throws Exception {
+
+        //given
+        ArtImageByArtNameResponse response = artImageByArtNameResponse(false, null);
+
+        given(artsService.searchArtImageByArtName(any()))
+                .willReturn(response);
+
+        //when
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
+                .get("/api/image/media/name")
+                .param("idx", "3")
+                .param("name", "name")
+                .param("limit", "5")
+                .param("category","기타"));
+
+        //then
+        resultActions.andExpect(status().isOk())
+                .andDo(print())
+                .andDo(
+                        document("image/media/name/category",
+                                requestParameters(
+                                        parameterWithName("idx").description("요청을 시작하는 id 위치"),
+                                        parameterWithName("name").description("검색 이름"),
+                                        parameterWithName("limit").description("요청하는 데이터 개수"),
+                                        parameterWithName("category").description("요청하는 카테고리")
+                                ),
+                                responseFields(
+                                        fieldWithPath("artImageResponses.[].id").type(JsonFieldType.NUMBER)
+                                                .description("id"),
+                                        fieldWithPath("artImageResponses.[].artName").type(JsonFieldType.STRING)
+                                                .description("작품 이름"),
+                                        fieldWithPath("artImageResponses.[].imageURL").type(JsonFieldType.STRING)
+                                                .description("이미지 URL"),
+                                        fieldWithPath("nextIdx").type(JsonFieldType.NULL)
+                                                .description("다음 페이지 idx"),
+                                        fieldWithPath("hasNext").type(JsonFieldType.BOOLEAN)
+                                                .description("다음 페이지 유무")
+                                )
+                        )
+                );
+
+    }
+
+    @Test
+    @WithMockUser
     public void 메인화면에서_작품명_검색시_검색어와_일치하는_데이터가_없는_경우_응답() throws Exception {
 
         //given
-        given(artsService.searchArtImageByArtName(any())).willThrow(new ArtsNotFoundException());
+        ArtImageByArtNameResponse response = new ArtImageByArtNameResponse(List.of(), null, false);
+        given(artsService.searchArtImageByArtName(any()))
+                .willReturn(response);
 
         //when
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
@@ -521,10 +679,19 @@ class ArtsControllerTest extends BaseControllerTest {
                 .param("name", "name")
                 .param("limit", "5"));
         //then
-        resultActions.andExpect(status().isNotFound())
+        resultActions.andExpect(status().isOk())
                 .andDo(print())
                 .andDo(
-                        document("image/media/name/notfound")
+                        document("image/media/name/empty",
+                                responseFields(
+                                        fieldWithPath("artImageResponses").type(JsonFieldType.ARRAY)
+                                                .description("데이터가 없는 경우 리스트는 비어있음"),
+                                        fieldWithPath("nextIdx").type(JsonFieldType.NULL)
+                                                .description("다음 페이지 idx"),
+                                        fieldWithPath("hasNext").type(JsonFieldType.BOOLEAN)
+                                                .description("다음 페이지 유무")
+                                )
+                        )
                 );
     }
 

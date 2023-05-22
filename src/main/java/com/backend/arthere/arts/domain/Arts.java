@@ -11,7 +11,10 @@ import javax.validation.constraints.NotNull;
 @Entity
 @Getter
 @NoArgsConstructor
-@Table(indexes = @Index(name = "idx_revision_date", columnList = "revision_date, id"))
+@Table(indexes = {
+        @Index(name = "idx_revision_date", columnList = "revision_date desc, id desc"),
+        @Index(name = "idx_art_name", columnList = "art_name, id desc")
+})
 public class Arts extends BaseEntity {
 
     @Id
@@ -19,7 +22,7 @@ public class Arts extends BaseEntity {
     private Long id;
 
     @NotNull
-    @Column(name = "art_name")
+    @Column(name = "art_name", length = 50)
     private String artName;
 
     @NotNull
@@ -36,6 +39,14 @@ public class Arts extends BaseEntity {
     @Column(length = 50)
     @Enumerated(EnumType.STRING)
     private Category category;
+
+    @NotNull
+    @Column(name = "post_total")
+    private Long postTotal = 0L;
+
+    @NotNull
+    @Column(name = "star_rating")
+    private Integer starRating = 0;
 
     @Builder
     public Arts(Long id, String artName, String imageURL, Location location, Address address, Category category) {

@@ -27,7 +27,7 @@ public class AdminS3Config {
     @Value("${aws.credentials.secretKey}")
     private String secretKey;
 
-    @Bean(name = "AdminS3Client")
+    @Bean(name = "adminS3Client")
     public AmazonS3 createS3Client() {
 
         AWSCredentials credentials = new BasicAWSCredentials(accessKey, secretKey);
@@ -38,7 +38,7 @@ public class AdminS3Config {
                 .build();
     }
 
-    @Bean(name = "AdminBucketName")
+    @Bean(name = "adminBucketName")
     public String getBucketName() {
         return bucketName;
     }

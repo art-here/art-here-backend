@@ -1,14 +1,20 @@
 package com.backend.arthere.arts.presentation;
 
 import com.backend.arthere.arts.application.ArtsService;
-import com.backend.arthere.arts.dto.*;
+import com.backend.arthere.arts.dto.request.ArtImageByAddressRequest;
+import com.backend.arthere.arts.dto.request.ArtImageByArtNameRequest;
+import com.backend.arthere.arts.dto.request.ArtImageByLocationRequest;
+import com.backend.arthere.arts.dto.request.ArtImageByRevisionDateRequest;
+import com.backend.arthere.arts.dto.response.ArtImageByLocationResponse;
+import com.backend.arthere.arts.dto.response.ArtImageByRevisionDateResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @Validated
@@ -28,7 +34,7 @@ public class ArtsController {
 
     @GetMapping("/media/address")
     public ResponseEntity<?> searchArtImageByAddress(
-            @Valid final ArtImageByAddressRequest request)  {
+            @Valid final ArtImageByAddressRequest request) {
 
         return ResponseEntity.ok(artsService.searchArtImageByAddress(request));
     }
@@ -40,10 +46,10 @@ public class ArtsController {
     }
 
     @GetMapping("/map")
-    public ResponseEntity<?> findArtImageByLocation(@RequestParam("latitude") @NotNull Double latitude,
-                                                    @RequestParam("longitude") @NotNull Double longitude) {
+    public ResponseEntity<?> findArtImageByLocation(@Valid ArtImageByLocationRequest request) {
 
-        List<ArtImageByLocationResponse> artImageResponses = artsService.findArtImageByLocation(latitude, longitude);
+        List<ArtImageByLocationResponse> artImageResponses = artsService
+                .findArtImageByLocation(request);
         return ResponseEntity.ok(artImageResponses);
     }
 

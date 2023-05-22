@@ -20,12 +20,11 @@ public class Details {
     @Column(name = "id")
     private Long id;
 
-    @NotNull
-    @Column(name = "author_name")
+    @Column(name = "author_name", length = 50)
     private String authorName;
 
     @NotNull
-    @Column(name = "agency")
+    @Column(name = "agency", length = 50)
     private String agency;
 
     @NotNull
@@ -39,7 +38,7 @@ public class Details {
     @Embedded
     private ExhibitionPeriod period;
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "arts_id")
     private Arts arts;
 

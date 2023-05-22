@@ -1,6 +1,11 @@
 package com.backend.arthere.arts.domain;
 
-import com.backend.arthere.arts.dto.*;
+import com.backend.arthere.arts.dto.request.ArtImageByAddressRequest;
+import com.backend.arthere.arts.dto.request.ArtImageByArtNameRequest;
+import com.backend.arthere.arts.dto.request.ArtImageByRevisionDateRequest;
+import com.backend.arthere.arts.dto.response.ArtImageByLocationResponse;
+import com.backend.arthere.arts.dto.response.ArtImageResponse;
+import com.backend.arthere.arts.dto.response.LocationRangeResponse;
 import com.backend.arthere.global.config.JpaConfig;
 import com.backend.arthere.global.config.QueryDslConfig;
 import org.assertj.core.api.Assertions;
@@ -197,7 +202,7 @@ class ArtsRepositoryTest {
 
         String artName = "모래작품";
         String imageURL = "image/sand";
-        Address address = new Address("loadAddress", "oldAddress");
+        Address address = new Address("loadAddress");
 
         for (int i = 1; i < 6; i++) {
             artsRepository.save(
@@ -224,7 +229,7 @@ class ArtsRepositoryTest {
             request.setIdx(idx);
         }
         if (revisionDateIdx != null) {
-            request.setRevisionDateIdx(revisionDateIdx);
+            request.setDate(revisionDateIdx);
         }
         request.setLimit(limit);
 
