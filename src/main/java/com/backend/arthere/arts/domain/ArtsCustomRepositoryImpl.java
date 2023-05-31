@@ -31,7 +31,9 @@ public class ArtsCustomRepositoryImpl implements ArtsCustomRepository {
         List<ArtImageResponse> revisionDate = findRevisionDateEqual(request);
 
         if (revisionDate.size() < request.getLimit()) {
-            int limit = request.getLimit() - revisionDate.size();
+            int end = revisionDate.size();
+            int limit = request.getLimit() - end;
+            request.setIdx(String.valueOf(revisionDate.get(end - 1).getId()));
             revisionDate.addAll(findRevisionDateBefore(request, limit));
         }
         return revisionDate;
@@ -169,8 +171,11 @@ public class ArtsCustomRepositoryImpl implements ArtsCustomRepository {
 
     private BooleanExpression revisionDateBeforeIdx(LocalDateTime dateIdx, Long idx) {
 
-        if (dateIdx == null || idx == null) {
+        if (idx == null) {
             return null;
+        }
+        if (dateIdx == null) {
+            return arts.id.lt(idx);
         }
         return arts.revisionDate.lt(dateIdx);
     }
